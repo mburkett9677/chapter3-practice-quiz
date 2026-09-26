@@ -279,7 +279,7 @@
           ${mastery.map((m) => `<li>${escapeHtml(m.label)}</li>`).join("")}
         </ul>
         <p class="learn-back-links learn-review-cta">
-          <a class="btn btn-primary" href="index.html#history-heading">Practice History quizzes</a>
+          <a class="btn btn-primary" href="index.html#history-heading">History quizzes</a>
         </p>
       </section>`;
   }
