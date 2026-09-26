@@ -1,1 +1,1 @@
-file:///agent/chapter3-quiz/learn-content.js
+{{file:/tmp/learn-content.min.js}}
