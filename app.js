@@ -16,6 +16,8 @@
     questionPrompt: document.getElementById("question-prompt"),
     choices: document.getElementById("choices"),
     feedback: document.getElementById("feedback"),
+    btnBack: document.getElementById("btn-back"),
+    btnRestart: document.getElementById("btn-restart"),
     btnNext: document.getElementById("btn-next"),
     scoreFinal: document.getElementById("score-final"),
     scoreMessage: document.getElementById("score-message"),
@@ -30,6 +32,7 @@
     index: 0,
     score: 0,
     answered: false,
+    answers: {}, // index -> { choiceIndex, correct }
     missed: [],
   };
 
@@ -93,11 +96,36 @@
     return base;
   }
 
+  function recomputeScoreAndMissed() {
+    let score = 0;
+    const missed = [];
+    state.queue.forEach((q, i) => {
+      const ans = state.answers[i];
+      if (!ans) return;
+      if (ans.correct) {
+        score += 1;
+        return;
+      }
+      const correctIndex = q.choices.findIndex((c) => c.correct);
+      missed.push({
+        id: q.id,
+        topic: q.topic,
+        prompt: q.prompt,
+        question: q.question,
+        correctText: q.choices[correctIndex].text,
+        explain: q.explain,
+      });
+    });
+    state.score = score;
+    state.missed = missed;
+  }
+
   function startQuiz() {
     state.queue = buildQueue();
     state.index = 0;
     state.score = 0;
     state.answered = false;
+    state.answers = {};
     state.missed = [];
     els.missedList.hidden = true;
     els.missedList.innerHTML = "";
@@ -105,32 +133,78 @@
     renderQuestion();
   }
 
+  function startOver() {
+    showScreen("start");
+    state.queue = [];
+    state.index = 0;
+    state.score = 0;
+    state.answered = false;
+    state.answers = {};
+    state.missed = [];
+    els.missedList.hidden = true;
+    els.missedList.innerHTML = "";
+  }
+
   function current() {
     return state.queue[state.index];
   }
 
+  function updateNav() {
+    const last = state.index >= state.queue.length - 1;
+    els.btnBack.disabled = state.index <= 0;
+    els.btnNext.disabled = !state.answered;
+    els.btnNext.textContent = last ? "See results" : "Next";
+  }
+
   function updateProgress() {
     const total = state.queue.length;
-    const pct = ((state.index) / total) * 100;
+    const answeredCount = Object.keys(state.answers).length;
+    const pct = (answeredCount / total) * 100;
     els.progressFill.style.width = `${pct}%`;
     els.qCounter.textContent = `Question ${state.index + 1} of ${total}`;
     els.scoreLive.textContent = `Score: ${state.score}`;
   }
 
+  function showAnswerState(choiceIndex) {
+    const q = current();
+    const buttons = [...els.choices.querySelectorAll(".choice")];
+    const chosen = q.choices[choiceIndex];
+    const correctIndex = q.choices.findIndex((c) => c.correct);
+
+    buttons.forEach((btn, i) => {
+      btn.disabled = true;
+      btn.classList.remove("is-correct", "is-wrong", "is-missed-correct");
+      if (i === correctIndex) {
+        btn.classList.add(i === choiceIndex ? "is-correct" : "is-missed-correct");
+      }
+      if (i === choiceIndex && !chosen.correct) {
+        btn.classList.add("is-wrong");
+      }
+    });
+
+    if (chosen.correct) {
+      els.feedback.className = "feedback is-correct";
+      els.feedback.innerHTML = `<strong>Correct!</strong><p class="explain">${q.explain || ""}</p>`;
+    } else {
+      els.feedback.className = "feedback is-wrong";
+      els.feedback.innerHTML = `<strong>Not quite.</strong><p class="explain">${q.explain || ""}</p>`;
+    }
+    els.feedback.hidden = false;
+    renderMath(els.feedback);
+  }
+
   function renderQuestion() {
     const q = current();
-    state.answered = false;
+    const prior = state.answers[state.index];
+    state.answered = Boolean(prior);
     updateProgress();
+    updateNav();
 
     els.qTopic.textContent = q.topic;
     els.feedback.hidden = true;
     els.feedback.className = "feedback";
     els.feedback.innerHTML = "";
-    els.btnNext.hidden = true;
-    els.btnNext.textContent =
-      state.index === state.queue.length - 1 ? "See results" : "Next question";
 
-    // Prefer prompt as the readable stem; math expression as display
     const hasMathQ = Boolean(q.question && q.question.trim());
     const promptHtml = q.prompt || "";
 
@@ -158,11 +232,13 @@
       els.choices.appendChild(btn);
     });
 
+    if (prior) {
+      showAnswerState(prior.choiceIndex);
+    }
+
     renderMath(els.questionPrompt);
-    // Re-trigger panel animation
     const panel = document.getElementById("question-panel");
     panel.style.animation = "none";
-    // force reflow
     void panel.offsetWidth;
     panel.style.animation = "";
   }
@@ -172,47 +248,20 @@
     state.answered = true;
 
     const q = current();
-    const buttons = [...els.choices.querySelectorAll(".choice")];
     const chosen = q.choices[choiceIndex];
-    const correctIndex = q.choices.findIndex((c) => c.correct);
 
-    buttons.forEach((btn, i) => {
-      btn.disabled = true;
-      if (i === correctIndex) {
-        btn.classList.add(i === choiceIndex ? "is-correct" : "is-missed-correct");
-      }
-      if (i === choiceIndex && !chosen.correct) {
-        btn.classList.add("is-wrong");
-      }
-    });
-
-    if (chosen.correct) {
-      state.score += 1;
-      els.feedback.className = "feedback is-correct";
-      els.feedback.innerHTML = `<strong>Correct!</strong><p class="explain">${q.explain || ""}</p>`;
-    } else {
-      state.missed.push({
-        id: q.id,
-        topic: q.topic,
-        prompt: q.prompt,
-        question: q.question,
-        correctText: q.choices[correctIndex].text,
-        explain: q.explain,
-      });
-      els.feedback.className = "feedback is-wrong";
-      els.feedback.innerHTML = `<strong>Not quite.</strong><p class="explain">${q.explain || ""}</p>`;
-    }
-
-    els.feedback.hidden = false;
-    els.btnNext.hidden = false;
-    els.scoreLive.textContent = `Score: ${state.score}`;
-    renderMath(els.feedback);
-
-    const answeredPct = ((state.index + 1) / state.queue.length) * 100;
-    els.progressFill.style.width = `${answeredPct}%`;
+    state.answers[state.index] = {
+      choiceIndex,
+      correct: Boolean(chosen.correct),
+    };
+    recomputeScoreAndMissed();
+    showAnswerState(choiceIndex);
+    updateNav();
+    updateProgress();
   }
 
   function next() {
+    if (!state.answered) return;
     if (state.index >= state.queue.length - 1) {
       showResults();
       return;
@@ -221,7 +270,14 @@
     renderQuestion();
   }
 
+  function back() {
+    if (state.index <= 0) return;
+    state.index -= 1;
+    renderQuestion();
+  }
+
   function showResults() {
+    recomputeScoreAndMissed();
     const total = state.queue.length;
     const pct = Math.round((state.score / total) * 100);
     els.scoreFinal.textContent = `${state.score} / ${total}`;
@@ -264,13 +320,12 @@
   });
 
   els.btnStart.addEventListener("click", startQuiz);
+  els.btnBack.addEventListener("click", back);
+  els.btnRestart.addEventListener("click", startOver);
   els.btnNext.addEventListener("click", next);
-  els.btnRetry.addEventListener("click", () => {
-    showScreen("start");
-  });
+  els.btnRetry.addEventListener("click", startOver);
   els.btnReview.addEventListener("click", reviewMissed);
 
-  // Wait for KaTeX auto-render to load, then idle on start
   function boot() {
     showScreen("start");
   }
