@@ -312,6 +312,14 @@ body {
   min-width: 0;
   font-size: 1.05rem;
   line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.choice-body .katex {
+  font-size: 1.05em;
+  white-space: normal;
 }
 
 .choice.is-correct {
