@@ -84,11 +84,14 @@
   }
 
   function buildQueue() {
-    const base = window.QUIZ_QUESTIONS.map((q) => ({
-      ...q,
-      choices: shuffle(q.choices.map((c) => ({ ...c }))),
-    }));
+    const base = shuffle(
+      window.QUIZ_QUESTIONS.map((q) => ({
+        ...q,
+        choices: shuffle(q.choices.map((c) => ({ ...c }))),
+      }))
+    );
     if (state.includeBonus && window.BONUS_QUESTION) {
+      // Keep bonus at the end so it stays optional extra credit
       base.push({
         ...window.BONUS_QUESTION,
         choices: shuffle(window.BONUS_QUESTION.choices.map((c) => ({ ...c }))),
