@@ -79,6 +79,24 @@ window.QUIZ_NAV = {
       "title": "Early America · Quiz 5",
       "blurb": "Georgia, regions & the 13 colonies",
       "count": 10
+    },
+    {
+      "id": "history-6",
+      "title": "Early America · Quiz 6",
+      "blurb": "Middle Passage & colonial slavery",
+      "count": 10
+    },
+    {
+      "id": "history-7",
+      "title": "Early America · Quiz 7",
+      "blurb": "Resistance, Jamestown & New England",
+      "count": 10
+    },
+    {
+      "id": "history-8",
+      "title": "Early America · Quiz 8",
+      "blurb": "Maryland, Pennsylvania, Georgia & government",
+      "count": 10
     }
   ]
 };
