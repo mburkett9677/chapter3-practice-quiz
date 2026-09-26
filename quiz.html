@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Quiz</title>
+  <title>Claire’s Quizzes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,15 +15,27 @@
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
   <div class="bg-grid" aria-hidden="true"></div>
+  <div class="sparkles" aria-hidden="true">
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+  </div>
 
   <main id="app" class="app">
     <section id="screen-start" class="screen screen-start is-active">
-      <p class="eyebrow" id="quiz-eyebrow">Quiz</p>
-      <h1 class="brand" id="quiz-brand">Practice<br /><span>Quiz</span></h1>
+      <p class="eyebrow" id="quiz-eyebrow">Claire’s Quizzes</p>
+      <h1 class="brand" id="quiz-brand">Claire’s<br /><span>Quiz</span></h1>
       <p class="lede" id="quiz-lede">10 questions. One at a time — pick an answer and see if you’re right before moving on.</p>
       <div class="cta-row">
         <button type="button" class="btn btn-primary" id="btn-start">Start quiz</button>
-        <a class="btn btn-ghost" href="index.html">All quizzes</a>
+        <a class="btn btn-ghost" href="index.html">Claire’s Quizzes</a>
       </div>
       <p class="meta" id="quiz-meta"></p>
     </section>
@@ -64,7 +76,7 @@
       <div class="cta-row">
         <button type="button" class="btn btn-primary" id="btn-retry">Try again</button>
         <button type="button" class="btn btn-ghost" id="btn-review">Review missed</button>
-        <a class="btn btn-ghost" href="index.html">All quizzes</a>
+        <a class="btn btn-ghost" href="index.html">Claire’s Quizzes</a>
       </div>
       <ul class="missed-list" id="missed-list" hidden></ul>
     </section>
@@ -74,7 +86,7 @@
       <h1 class="brand">Quiz missing</h1>
       <p class="lede">That quiz link isn’t valid. Head back and pick one from the list.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="index.html">All quizzes</a>
+        <a class="btn btn-primary" href="index.html">Claire’s Quizzes</a>
       </div>
     </section>
   </main>
