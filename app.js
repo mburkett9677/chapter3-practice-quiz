@@ -74,30 +74,6 @@
     return tex;
   }
 
-  // Word problems and statements must not go through KaTeX as a whole string —
-  // math mode drops spaces and treats letters as variables (overflowing the card).
-  function isPureMath(text) {
-    const t = String(text || "").trim();
-    if (!t) return false;
-    if (/\\[a-zA-Z]+/.test(t)) {
-      const withoutTex = t
-        .replace(/\\[a-zA-Z]+\*?/g, " ")
-        .replace(/[{}\[\]()^_]/g, " ")
-        .replace(/\\./g, " ");
-      const words = withoutTex.match(/[A-Za-z]{3,}/g);
-      return !(words && words.length >= 2);
-    }
-    if (/^[\d\s.+\-*/=<>≤≥≠]+$/.test(t)) return true;
-    if (/[A-Za-z]{2,}/.test(t)) return false;
-    return true;
-  }
-
-  function renderQuestionBody(text, displayMode) {
-    if (!text) return "";
-    if (isPureMath(text)) return katexHtml(text, displayMode);
-    return text;
-  }
-
   function shuffle(arr) {
     const copy = arr.slice();
     for (let i = copy.length - 1; i > 0; i--) {
@@ -233,11 +209,11 @@
     els.feedback.className = "feedback";
     els.feedback.innerHTML = "";
 
-    const hasQuestion = Boolean(q.question && q.question.trim());
+    const hasMathQ = Boolean(q.question && q.question.trim());
     const promptHtml = q.prompt || "";
 
-    if (hasQuestion) {
-      els.questionText.innerHTML = renderQuestionBody(q.question, true);
+    if (hasMathQ) {
+      els.questionText.innerHTML = katexHtml(q.question, true);
       els.questionPrompt.hidden = !promptHtml;
       els.questionPrompt.innerHTML = promptHtml;
     } else {
@@ -254,7 +230,7 @@
       btn.dataset.index = String(i);
       btn.innerHTML = `
         <span class="choice-letter">${LETTERS[i]}</span>
-        <span class="choice-body">${renderQuestionBody(choice.text)}</span>
+        <span class="choice-body">${katexHtml(choice.text)}</span>
       `;
       btn.addEventListener("click", () => onChoose(i));
       els.choices.appendChild(btn);
@@ -264,7 +240,6 @@
       showAnswerState(prior.choiceIndex);
     }
 
-    renderMath(els.questionText);
     renderMath(els.questionPrompt);
     const panel = document.getElementById("question-panel");
     panel.style.animation = "none";
@@ -334,8 +309,8 @@
         (m) => `
       <li>
         <h3>${m.topic} · Q${m.id}</h3>
-        <p class="q">${m.prompt || ""}${m.question ? " " + renderQuestionBody(m.question) : ""}</p>
-        <p class="ans">Correct answer: ${renderQuestionBody(m.correctText)}</p>
+        <p class="q">${m.prompt || ""}${m.question ? " " + katexHtml(m.question) : ""}</p>
+        <p class="ans">Correct answer: ${katexHtml(m.correctText)}</p>
         <p class="explain">${m.explain || ""}</p>
       </li>`
       )
@@ -348,8 +323,8 @@
     els.btnBonus.classList.toggle("is-on", state.includeBonus);
     els.btnBonus.setAttribute("aria-pressed", String(state.includeBonus));
     els.bonusStatus.textContent = state.includeBonus
-      ? "Bonus question: on (26 questions)"
-      : "Bonus question: off (25 questions)";
+      ? "Bonus question: on (51 questions)"
+      : "Bonus question: off (50 questions)";
   });
 
   els.btnStart.addEventListener("click", startQuiz);
