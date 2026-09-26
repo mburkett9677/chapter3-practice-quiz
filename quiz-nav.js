@@ -29,6 +29,24 @@ window.QUIZ_NAV = {
       "title": "Chapter 3 · Quiz 5",
       "blurb": "Easier review · algebra & word problems",
       "count": 10
+    },
+    {
+      "id": "math-6",
+      "title": "Chapter 3 · Quiz 6",
+      "blurb": "On-level · decimals, compare & true/false",
+      "count": 10
+    },
+    {
+      "id": "math-7",
+      "title": "Chapter 3 · Quiz 7",
+      "blurb": "On-level · multiply & divide",
+      "count": 10
+    },
+    {
+      "id": "math-8",
+      "title": "Chapter 3 · Quiz 8",
+      "blurb": "On-level · add/subtract, algebra & words",
+      "count": 10
     }
   ],
   "history": [
