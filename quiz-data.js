@@ -1,1 +1,1 @@
-@/agent/chapter3-quiz/quiz-data.js
+LOAD_FROM_LOCAL_FILE
