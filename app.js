@@ -100,19 +100,30 @@
     }
   }
 
+  function looksLikeMath(text) {
+    if (!text) return false;
+    return /\\[a-zA-Z]+|\$|[_^{}]|\\dfrac|\\frac|\\times|\\div|\\left|\\right|\\overline|\\quad/.test(
+      String(text)
+    );
+  }
+
   function katexHtml(tex, displayMode) {
     if (!tex) return "";
+    const raw = String(tex);
+    if (!looksLikeMath(raw)) {
+      return escapeHtml(raw);
+    }
     if (window.katex) {
       try {
-        return window.katex.renderToString(tex, {
+        return window.katex.renderToString(raw, {
           throwOnError: false,
           displayMode: Boolean(displayMode),
         });
       } catch {
-        return tex;
+        return escapeHtml(raw);
       }
     }
-    return tex;
+    return escapeHtml(raw);
   }
 
   function shuffle(arr) {
