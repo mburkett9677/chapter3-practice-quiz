@@ -1,13 +1,21 @@
 (function () {
   const LETTERS = ["A", "B", "C", "D"];
 
+  const params = new URLSearchParams(window.location.search);
+  const quizId = params.get("id");
+  const catalog = window.QUIZ_CATALOG;
+  const quizDef = catalog && quizId ? catalog.quizzes[quizId] : null;
+
   const els = {
     start: document.getElementById("screen-start"),
     quiz: document.getElementById("screen-quiz"),
     results: document.getElementById("screen-results"),
+    missing: document.getElementById("screen-missing"),
     btnStart: document.getElementById("btn-start"),
-    btnBonus: document.getElementById("btn-include-bonus"),
-    bonusStatus: document.getElementById("bonus-status"),
+    quizEyebrow: document.getElementById("quiz-eyebrow"),
+    quizBrand: document.getElementById("quiz-brand"),
+    quizLede: document.getElementById("quiz-lede"),
+    quizMeta: document.getElementById("quiz-meta"),
     progressFill: document.getElementById("progress-fill"),
     qTopic: document.getElementById("q-topic"),
     qCounter: document.getElementById("q-counter"),
@@ -28,22 +36,55 @@
   };
 
   const state = {
-    includeBonus: false,
     queue: [],
     index: 0,
     score: 0,
     answered: false,
-    answers: {}, // index -> { choiceIndex, correct }
+    answers: {},
     missed: [],
   };
 
   function showScreen(name) {
-    els.start.hidden = name !== "start";
-    els.quiz.hidden = name !== "quiz";
-    els.results.hidden = name !== "results";
-    els.start.classList.toggle("is-active", name === "start");
-    els.quiz.classList.toggle("is-active", name === "quiz");
-    els.results.classList.toggle("is-active", name === "results");
+    const map = {
+      start: els.start,
+      quiz: els.quiz,
+      results: els.results,
+      missing: els.missing,
+    };
+    Object.entries(map).forEach(([key, el]) => {
+      if (!el) return;
+      el.hidden = key !== name;
+      el.classList.toggle("is-active", key === name);
+    });
+  }
+
+  if (!quizDef) {
+    showScreen("missing");
+    return;
+  }
+
+  document.title = quizDef.title;
+  els.quizEyebrow.textContent = quizDef.subject;
+  const [brandMain, brandSpan] = splitTitle(quizDef.title);
+  els.quizBrand.innerHTML = `${escapeHtml(brandMain)}<br /><span>${escapeHtml(brandSpan)}</span>`;
+  els.quizLede.textContent = `${quizDef.count} questions. ${quizDef.blurb}. One at a time — pick an answer and see if you’re right before moving on.`;
+  els.quizMeta.textContent = `${quizDef.count} questions · randomized each start`;
+
+  function splitTitle(title) {
+    if (title.includes("·")) {
+      const [a, b] = title.split("·").map((s) => s.trim());
+      return [a, b || "Quiz"];
+    }
+    const parts = title.split(" ");
+    return [parts.slice(0, -1).join(" ") || title, parts.slice(-1)[0] || "Quiz"];
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function renderMath(root) {
@@ -84,20 +125,12 @@
   }
 
   function buildQueue() {
-    const base = shuffle(
-      window.QUIZ_QUESTIONS.map((q) => ({
+    return shuffle(
+      quizDef.questions.map((q) => ({
         ...q,
         choices: shuffle(q.choices.map((c) => ({ ...c }))),
       }))
     );
-    if (state.includeBonus && window.BONUS_QUESTION) {
-      // Keep bonus at the end so it stays optional extra credit
-      base.push({
-        ...window.BONUS_QUESTION,
-        choices: shuffle(window.BONUS_QUESTION.choices.map((c) => ({ ...c }))),
-      });
-    }
-    return base;
   }
 
   function recomputeScoreAndMissed() {
@@ -209,7 +242,7 @@
     els.feedback.className = "feedback";
     els.feedback.innerHTML = "";
 
-    const hasMathQ = Boolean(q.question && q.question.trim());
+    const hasMathQ = Boolean(q.question && String(q.question).trim());
     const promptHtml = q.prompt || "";
 
     if (hasMathQ) {
@@ -241,6 +274,7 @@
     }
 
     renderMath(els.questionPrompt);
+    renderMath(els.questionText);
     const panel = document.getElementById("question-panel");
     panel.style.animation = "none";
     void panel.offsetWidth;
@@ -318,15 +352,6 @@
     renderMath(els.missedList);
   }
 
-  els.btnBonus.addEventListener("click", () => {
-    state.includeBonus = !state.includeBonus;
-    els.btnBonus.classList.toggle("is-on", state.includeBonus);
-    els.btnBonus.setAttribute("aria-pressed", String(state.includeBonus));
-    els.bonusStatus.textContent = state.includeBonus
-      ? "Bonus question: on (51 questions)"
-      : "Bonus question: off (50 questions)";
-  });
-
   els.btnStart.addEventListener("click", startQuiz);
   els.btnBack.addEventListener("click", back);
   els.btnRestart.addEventListener("click", startOver);
@@ -334,13 +359,5 @@
   els.btnRetry.addEventListener("click", startOver);
   els.btnReview.addEventListener("click", reviewMissed);
 
-  function boot() {
-    showScreen("start");
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  showScreen("start");
 })();
