@@ -20,6 +20,7 @@
     btnRestart: document.getElementById("btn-restart"),
     btnNext: document.getElementById("btn-next"),
     scoreFinal: document.getElementById("score-final"),
+    scoreBreakdown: document.getElementById("score-breakdown"),
     scoreMessage: document.getElementById("score-message"),
     btnRetry: document.getElementById("btn-retry"),
     btnReview: document.getElementById("btn-review"),
@@ -279,8 +280,12 @@
   function showResults() {
     recomputeScoreAndMissed();
     const total = state.queue.length;
-    const pct = Math.round((state.score / total) * 100);
-    els.scoreFinal.textContent = `${state.score} / ${total}`;
+    const right = state.score;
+    const wrong = total - right;
+    const pct = Math.round((right / total) * 100);
+    els.scoreFinal.textContent = `${right} / ${total}`;
+    els.scoreBreakdown.innerHTML =
+      `<span class="right">${right} right</span> · <span class="wrong">${wrong} wrong</span>`;
     let message = "Keep practicing — review the missed questions and try again.";
     if (pct === 100) message = "Perfect score! You nailed every question.";
     else if (pct >= 80) message = "Strong work — just a few spots to tighten up.";
