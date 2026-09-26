@@ -145,7 +145,7 @@
           "correct": false
         },
         {
-          "text": "The grew most of Britain's sugar",
+          "text": "They grew most of Britain's sugar",
           "correct": false
         },
         {
