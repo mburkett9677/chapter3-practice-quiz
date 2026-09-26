@@ -17,6 +17,7 @@
   <div class="bg-grid" aria-hidden="true"></div>
 
   <main id="app" class="app">
+    <!-- Start screen -->
     <section id="screen-start" class="screen screen-start is-active">
       <p class="eyebrow">Fractions · Decimals · Integers</p>
       <h1 class="brand">Chapter 3<br /><span>Practice Quiz</span></h1>
@@ -30,6 +31,7 @@
       <p class="meta" id="bonus-status">Bonus question: off</p>
     </section>
 
+    <!-- Question screen -->
     <section id="screen-quiz" class="screen screen-quiz" hidden>
       <header class="quiz-bar">
         <div class="progress-wrap">
@@ -50,11 +52,14 @@
         <div class="choices" id="choices" role="group" aria-label="Answer choices"></div>
         <div class="feedback" id="feedback" hidden></div>
         <div class="quiz-actions">
-          <button type="button" class="btn btn-primary" id="btn-next" hidden>Next question</button>
+          <button type="button" class="btn btn-ghost" id="btn-back">Back</button>
+          <button type="button" class="btn btn-ghost" id="btn-restart">Start over</button>
+          <button type="button" class="btn btn-primary" id="btn-next" disabled>Next</button>
         </div>
       </article>
     </section>
 
+    <!-- Results screen -->
     <section id="screen-results" class="screen screen-results" hidden>
       <p class="eyebrow">Nice work</p>
       <h1 class="brand results-brand">Your results</h1>
