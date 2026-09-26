@@ -3,78 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chapter 3 Practice Quiz</title>
+  <title>Practice Quizzes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
   <div class="bg-grid" aria-hidden="true"></div>
 
-  <main id="app" class="app">
-    <!-- Start screen -->
-    <section id="screen-start" class="screen screen-start is-active">
-      <p class="eyebrow">Fractions · Decimals · Integers</p>
-      <h1 class="brand">Chapter 3<br /><span>Practice Quiz</span></h1>
+  <main class="app home-app">
+    <section class="screen screen-start is-active">
+      <p class="eyebrow">Practice · One quiz at a time</p>
+      <h1 class="brand">Practice<br /><span>Quizzes</span></h1>
       <p class="lede">
-        50 questions (original set + easier review), plus a bonus. One question at a time — pick an answer and see if you’re right before moving on.
+        Pick a short 10-question quiz. Same format every time: answer, see if you’re right, then move on.
       </p>
-      <div class="cta-row">
-        <button type="button" class="btn btn-primary" id="btn-start">Start quiz</button>
-        <button type="button" class="btn btn-ghost" id="btn-include-bonus">Include bonus</button>
-      </div>
-      <p class="meta" id="bonus-status">Bonus question: off</p>
-    </section>
 
-    <!-- Question screen -->
-    <section id="screen-quiz" class="screen screen-quiz" hidden>
-      <header class="quiz-bar">
-        <div class="progress-wrap">
-          <div class="progress-track" aria-hidden="true">
-            <div class="progress-fill" id="progress-fill"></div>
-          </div>
-          <p class="progress-label">
-            <span id="q-topic"></span>
-            <span id="q-counter"></span>
-          </p>
-        </div>
-        <p class="score-live" id="score-live">Score: 0</p>
-      </header>
+      <section class="home-section" aria-labelledby="math-heading">
+        <h2 id="math-heading" class="home-heading">Math · Chapter 3</h2>
+        <p class="home-sub">Fractions, decimals, integers, and mixed operations — broken into five quizzes.</p>
+        <div class="quiz-links" id="math-links"></div>
+      </section>
 
-      <article class="question-panel" id="question-panel">
-        <h2 class="question-text" id="question-text"></h2>
-        <p class="question-prompt" id="question-prompt" hidden></p>
-        <div class="choices" id="choices" role="group" aria-label="Answer choices"></div>
-        <div class="feedback" id="feedback" hidden></div>
-        <div class="quiz-actions">
-          <button type="button" class="btn btn-ghost" id="btn-back">Back</button>
-          <button type="button" class="btn btn-ghost" id="btn-restart">Start over</button>
-          <button type="button" class="btn btn-primary" id="btn-next" disabled>Next</button>
-        </div>
-      </article>
-    </section>
-
-    <!-- Results screen -->
-    <section id="screen-results" class="screen screen-results" hidden>
-      <p class="eyebrow">Nice work</p>
-      <h1 class="brand results-brand">Your results</h1>
-      <p class="score-big" id="score-final"></p>
-      <p class="score-breakdown" id="score-breakdown"></p>
-      <p class="lede" id="score-message"></p>
-      <div class="cta-row">
-        <button type="button" class="btn btn-primary" id="btn-retry">Try again</button>
-        <button type="button" class="btn btn-ghost" id="btn-review">Review missed</button>
-      </div>
-      <ul class="missed-list" id="missed-list" hidden></ul>
+      <section class="home-section" aria-labelledby="history-heading">
+        <h2 id="history-heading" class="home-heading">History</h2>
+        <p class="home-sub">Early American History — colonies, leaders, religion, and the Atlantic world.</p>
+        <div class="quiz-links" id="history-links"></div>
+      </section>
     </section>
   </main>
 
-  <script src="quiz-data.js"></script>
-  <script src="app.js"></script>
+  <script src="quiz-catalog.js"></script>
+  <script>
+    (function () {
+      const catalog = window.QUIZ_CATALOG;
+      if (!catalog) return;
+
+      function renderGroup(elId, items) {
+        const root = document.getElementById(elId);
+        root.innerHTML = items
+          .map(
+            (q) => `
+          <a class="quiz-link" href="quiz.html?id=${encodeURIComponent(q.id)}">
+            <span class="quiz-link-title">${q.title}</span>
+            <span class="quiz-link-meta">${q.count} questions · ${q.blurb}</span>
+          </a>`
+          )
+          .join("");
+      }
+
+      renderGroup("math-links", catalog.nav.math);
+      renderGroup("history-links", catalog.nav.history);
+    })();
+  </script>
 </body>
 </html>
