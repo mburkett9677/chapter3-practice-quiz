@@ -380,7 +380,21 @@ body {
 .quiz-actions {
   margin-top: 1.25rem;
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz-actions .btn-primary {
+  margin-left: auto;
+}
+
+.quiz-actions .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .score-big {
@@ -441,5 +455,18 @@ body {
 
   .cta-row .btn {
     width: 100%;
+  }
+
+  .quiz-actions {
+    flex-direction: column;
+  }
+
+  .quiz-actions .btn {
+    width: 100%;
+  }
+
+  .quiz-actions .btn-primary {
+    margin-left: 0;
+    order: -1;
   }
 }
