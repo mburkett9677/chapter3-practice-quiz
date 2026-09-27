@@ -25,13 +25,18 @@
     <span class="sparkle"></span>
   </div>
 
-  <main class="app home-app">
+  <main class="app home-app" id="home-root" hidden>
     <section class="screen screen-start is-active">
       <p class="eyebrow">Claire’s · One quiz at a time</p>
       <h1 class="brand">Claire’s<br /><span>Quizzes</span></h1>
-      <p class="lede">
+      <p class="lede" id="home-lede">
         Pick a short 10-question quiz. Same format every time: answer, see if you’re right, then move on.
       </p>
+      <p class="live-banner" id="live-banner" hidden>Live mode is on — each quiz can be taken once.</p>
+      <div class="cta-row home-user-row">
+        <p class="meta" id="home-user"></p>
+        <button type="button" class="btn btn-ghost" id="btn-signout">Sign out</button>
+      </div>
 
       <section class="home-section" aria-labelledby="english-heading">
         <h2 id="english-heading" class="home-heading">English Vocab</h2>
@@ -95,6 +100,7 @@
     </div>
   </div>
 
+  <script src="session.js"></script>
   <script src="vocab-unit3.js"></script>
   <script src="quiz-nav.js"></script>
   <script src="quiz-math-1.js"></script>
@@ -118,29 +124,69 @@
   <script src="quiz-catalog-boot.js"></script>
   <script>
     (function () {
+      const S = window.QuizSession;
       const catalog = window.QUIZ_CATALOG;
-      if (!catalog) return;
+      const homeRoot = document.getElementById("home-root");
+      const liveBanner = document.getElementById("live-banner");
+      const homeUser = document.getElementById("home-user");
+      const homeLede = document.getElementById("home-lede");
 
-      function renderGroup(elId, items) {
+      document.getElementById("btn-signout").addEventListener("click", () => S.logout());
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderGroup(elId, items, scores, liveMode) {
         const root = document.getElementById(elId);
         if (!root) return;
         root.innerHTML = (items || [])
-          .map(
-            (q) => `
-          <a class="quiz-link" href="quiz.html?id=${encodeURIComponent(q.id)}">
-            <span class="quiz-link-title">${q.title}</span>
-            <span class="quiz-link-meta">${q.count} questions · ${q.blurb}</span>
-          </a>`
-          )
+          .map((q) => {
+            const done = scores && scores[q.id];
+            const locked = liveMode && done;
+            const meta = done
+              ? `Score ${done.score}/${done.total}` + (locked ? " · done" : "")
+              : `${q.count} questions · ${q.blurb}`;
+            if (locked) {
+              return `
+              <div class="quiz-link is-done" aria-disabled="true">
+                <span class="quiz-link-title">${escapeHtml(q.title)}</span>
+                <span class="quiz-link-meta">${escapeHtml(meta)}</span>
+              </div>`;
+            }
+            return `
+              <a class="quiz-link" href="quiz.html?id=${encodeURIComponent(q.id)}">
+                <span class="quiz-link-title">${escapeHtml(q.title)}</span>
+                <span class="quiz-link-meta">${escapeHtml(meta)}</span>
+              </a>`;
+          })
           .join("");
       }
 
-      renderGroup("math-links", catalog.nav.math || []);
-      renderGroup("history-links", catalog.nav.history || []);
-      renderGroup("english-links", catalog.nav.english || []);
-    })();
+      async function boot() {
+        const state = await S.requireRole("student");
+        if (!state) return;
+        homeRoot.hidden = false;
+        homeUser.textContent = `Signed in as ${state.name}`;
+        liveBanner.hidden = !state.liveMode;
+        homeLede.textContent = state.liveMode
+          ? "Live mode is on. Finish each quiz carefully — you only get one try per quiz."
+          : "Pick a short 10-question quiz. Same format every time: answer, see if you’re right, then move on.";
 
-    (function () {
+        const scores = (state.scores && state.scores[state.studentKey]) || {};
+        if (!catalog) return;
+        renderGroup("math-links", catalog.nav.math || [], scores, state.liveMode);
+        renderGroup("history-links", catalog.nav.history || [], scores, state.liveMode);
+        renderGroup("english-links", catalog.nav.english || [], scores, state.liveMode);
+      }
+
+      boot().catch(() => S.logout());
+
+      // Vocab modal
       const data = window.VOCAB_UNIT3;
       const modal = document.getElementById("vocab-modal");
       const list = document.getElementById("vocab-list");
@@ -152,14 +198,6 @@
       const title = document.getElementById("vocab-modal-title");
       if (title) title.textContent = data.title;
       if (sub) sub.textContent = data.subtitle;
-
-      function escapeHtml(s) {
-        return String(s)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
 
       list.innerHTML = data.words
         .map(
