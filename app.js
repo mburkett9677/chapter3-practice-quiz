@@ -1,5 +1,5 @@
 (function () {
-  const LETTERS = ["A", "B", "C", "D"];
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   const params = new URLSearchParams(window.location.search);
   const quizId = params.get("id");
@@ -63,11 +63,15 @@
     return;
   }
 
+  const quizIsFill = quizDef.format === "fill";
+
   document.title = quizDef.title;
   els.quizEyebrow.textContent = quizDef.subject;
   const [brandMain, brandSpan] = splitTitle(quizDef.title);
   els.quizBrand.innerHTML = `${escapeHtml(brandMain)}<br /><span>${escapeHtml(brandSpan)}</span>`;
-  els.quizLede.textContent = `${quizDef.count} questions. ${quizDef.blurb}. One at a time — pick an answer and see if you’re right before moving on.`;
+  els.quizLede.textContent = quizIsFill
+    ? `${quizDef.count} questions. ${quizDef.blurb}. Type your answer, then check it before moving on.`
+    : `${quizDef.count} questions. ${quizDef.blurb}. One at a time — pick an answer and see if you’re right before moving on.`;
   els.quizMeta.textContent = `${quizDef.count} questions · randomized each start`;
 
   function splitTitle(title) {
@@ -135,12 +139,43 @@
     return copy;
   }
 
+  function isFillQuestion(q) {
+    return q.format === "fill" || quizDef.format === "fill";
+  }
+
+  function normalizeAnswer(s) {
+    return String(s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[’']/g, "'")
+      .replace(/[^a-z0-9'\s-]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function acceptedAnswers(q) {
+    const list = [];
+    if (Array.isArray(q.accepted)) list.push(...q.accepted);
+    if (q.answer) list.push(q.answer);
+    return [...new Set(list.map(normalizeAnswer).filter(Boolean))];
+  }
+
+  function correctAnswerText(q) {
+    if (isFillQuestion(q)) return q.answer || (q.accepted && q.accepted[0]) || "";
+    const correctIndex = (q.choices || []).findIndex((c) => c.correct);
+    return correctIndex >= 0 ? q.choices[correctIndex].text : "";
+  }
+
   function buildQueue() {
     return shuffle(
-      quizDef.questions.map((q) => ({
-        ...q,
-        choices: shuffle(q.choices.map((c) => ({ ...c }))),
-      }))
+      quizDef.questions.map((q) => {
+        if (isFillQuestion(q)) {
+          return { ...q, format: "fill" };
+        }
+        return {
+          ...q,
+          choices: shuffle((q.choices || []).map((c) => ({ ...c }))),
+        };
+      })
     );
   }
 
@@ -154,14 +189,14 @@
         score += 1;
         return;
       }
-      const correctIndex = q.choices.findIndex((c) => c.correct);
       missed.push({
         id: q.id,
         topic: q.topic,
         prompt: q.prompt,
         question: q.question,
-        correctText: q.choices[correctIndex].text,
+        correctText: correctAnswerText(q),
         explain: q.explain,
+        fill: isFillQuestion(q),
       });
     });
     state.score = score;
@@ -213,7 +248,7 @@
     els.scoreLive.textContent = `Score: ${state.score}`;
   }
 
-  function showAnswerState(choiceIndex) {
+  function showChoiceAnswerState(choiceIndex) {
     const q = current();
     const buttons = [...els.choices.querySelectorAll(".choice")];
     const chosen = q.choices[choiceIndex];
@@ -241,6 +276,109 @@
     renderMath(els.feedback);
   }
 
+  function showFillAnswerState(typed, correct) {
+    const q = current();
+    const wrap = els.choices.querySelector(".fill-wrap");
+    const input = els.choices.querySelector(".fill-input");
+    const checkBtn = els.choices.querySelector(".fill-check");
+    if (input) {
+      input.value = typed;
+      input.disabled = true;
+      input.classList.toggle("is-correct", correct);
+      input.classList.toggle("is-wrong", !correct);
+    }
+    if (checkBtn) checkBtn.disabled = true;
+    if (wrap) wrap.classList.toggle("is-answered", true);
+
+    if (correct) {
+      els.feedback.className = "feedback is-correct";
+      els.feedback.innerHTML = `<strong>Correct!</strong><p class="explain">${q.explain || ""}</p>`;
+    } else {
+      els.feedback.className = "feedback is-wrong";
+      els.feedback.innerHTML = `<strong>Not quite.</strong> The answer is <strong>${escapeHtml(
+        correctAnswerText(q)
+      )}</strong>.<p class="explain">${q.explain || ""}</p>`;
+    }
+    els.feedback.hidden = false;
+  }
+
+  function renderFillQuestion(q, prior) {
+    els.choices.className = "choices choices-fill";
+    els.choices.innerHTML = `
+      <div class="fill-wrap">
+        <label class="fill-label" for="fill-input">Your answer</label>
+        <div class="fill-row">
+          <input
+            id="fill-input"
+            class="fill-input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Type the vocabulary word"
+          />
+          <button type="button" class="btn btn-primary fill-check" id="fill-check">Check</button>
+        </div>
+        <p class="fill-hint">Spelling counts · capitalization does not</p>
+      </div>
+    `;
+
+    const input = els.choices.querySelector(".fill-input");
+    const checkBtn = els.choices.querySelector(".fill-check");
+
+    const submit = () => {
+      if (state.answered) return;
+      const typed = input.value;
+      if (!normalizeAnswer(typed)) {
+        input.focus();
+        return;
+      }
+      const correct = acceptedAnswers(q).includes(normalizeAnswer(typed));
+      state.answered = true;
+      state.answers[state.index] = { typed, correct };
+      recomputeScoreAndMissed();
+      showFillAnswerState(typed, correct);
+      updateNav();
+      updateProgress();
+    };
+
+    checkBtn.addEventListener("click", submit);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+      }
+    });
+
+    if (prior) {
+      showFillAnswerState(prior.typed, prior.correct);
+    } else {
+      input.focus();
+    }
+  }
+
+  function renderChoiceQuestion(q, prior) {
+    const many = (q.choices || []).length > 6;
+    els.choices.className = many ? "choices choices-dense" : "choices";
+    els.choices.innerHTML = "";
+    q.choices.forEach((choice, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "choice";
+      btn.dataset.index = String(i);
+      btn.innerHTML = `
+        <span class="choice-letter">${LETTERS[i] || i + 1}</span>
+        <span class="choice-body">${katexHtml(choice.text)}</span>
+      `;
+      btn.addEventListener("click", () => onChoose(i));
+      els.choices.appendChild(btn);
+    });
+
+    if (prior) {
+      showChoiceAnswerState(prior.choiceIndex);
+    }
+  }
+
   function renderQuestion() {
     const q = current();
     const prior = state.answers[state.index];
@@ -266,22 +404,12 @@
       els.questionPrompt.innerHTML = "";
     }
 
-    els.choices.innerHTML = "";
-    q.choices.forEach((choice, i) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "choice";
-      btn.dataset.index = String(i);
-      btn.innerHTML = `
-        <span class="choice-letter">${LETTERS[i]}</span>
-        <span class="choice-body">${katexHtml(choice.text)}</span>
-      `;
-      btn.addEventListener("click", () => onChoose(i));
-      els.choices.appendChild(btn);
-    });
-
-    if (prior) {
-      showAnswerState(prior.choiceIndex);
+    if (isFillQuestion(q)) {
+      els.questionPrompt.hidden = false;
+      els.questionPrompt.textContent = "Type the Unit 3 vocabulary word that completes the sentence.";
+      renderFillQuestion(q, prior);
+    } else {
+      renderChoiceQuestion(q, prior);
     }
 
     renderMath(els.questionPrompt);
@@ -304,7 +432,7 @@
       correct: Boolean(chosen.correct),
     };
     recomputeScoreAndMissed();
-    showAnswerState(choiceIndex);
+    showChoiceAnswerState(choiceIndex);
     updateNav();
     updateProgress();
   }
@@ -355,7 +483,9 @@
       <li>
         <h3>${m.topic} · Q${m.id}</h3>
         <p class="q">${m.prompt || ""}${m.question ? " " + katexHtml(m.question) : ""}</p>
-        <p class="ans">Correct answer: ${katexHtml(m.correctText)}</p>
+        <p class="ans">Correct answer: ${
+          m.fill ? escapeHtml(m.correctText) : katexHtml(m.correctText)
+        }</p>
         <p class="explain">${m.explain || ""}</p>
       </li>`
       )
