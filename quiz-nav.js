@@ -98,5 +98,19 @@ window.QUIZ_NAV = {
       "blurb": "Maryland, Pennsylvania, Georgia & government",
       "count": 10
     }
+  ],
+  "english": [
+    {
+      "id": "vocab-1",
+      "title": "Unit 3 · Definitions",
+      "blurb": "Match each definition to the right word",
+      "count": 10
+    },
+    {
+      "id": "vocab-2",
+      "title": "Unit 3 · Fill in the Blank",
+      "blurb": "Type the vocab word that completes each sentence",
+      "count": 10
+    }
   ]
 };
