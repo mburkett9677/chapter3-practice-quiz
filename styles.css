@@ -19,3 +19,22 @@
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Figtree", "Segoe UI", sans-serif;
 }
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: linear-gradient(155deg, #ffe4f0 0%, #fff0f6 38%, #ffe8f4 68%, #ffd6e8 100%);
+  overflow-x: hidden;
+}
