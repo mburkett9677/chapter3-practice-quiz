@@ -15,7 +15,14 @@
     btnClear: document.getElementById("btn-clear-scores"),
     btnLogout: document.getElementById("btn-logout"),
     btnRefresh: document.getElementById("btn-refresh"),
+    reviewModal: document.getElementById("review-modal"),
+    reviewTitle: document.getElementById("review-modal-title"),
+    reviewSub: document.getElementById("review-modal-sub"),
+    reviewList: document.getElementById("review-list"),
+    btnReviewClose: document.getElementById("btn-review-close"),
   };
+
+  let latestScores = {};
 
   const SUBJECTS = [
     { id: "math", label: "Math", quizzes: nav.math || [] },
@@ -37,6 +44,66 @@
       .replace(/"/g, "&quot;");
   }
 
+  function openReview(quizId) {
+    const row = latestScores[quizId];
+    if (!row) return;
+    const meta = allQuizzes().find((q) => q.id === quizId);
+    els.reviewTitle.textContent = row.title || (meta && meta.title) || quizId;
+    els.reviewSub.textContent = `${row.score} / ${row.total} · ${
+      (meta && meta.subjectLabel) || row.subject || ""
+    }`;
+
+    const review = Array.isArray(row.review) ? row.review : [];
+    if (!review.length) {
+      els.reviewList.innerHTML = `
+        <p class="meta">
+          No question-by-question detail was saved for this attempt.
+          Have the student retake the quiz (after Stop live / Clear scores if needed) to capture a full review.
+        </p>`;
+    } else {
+      els.reviewList.innerHTML = review
+        .map((item, i) => {
+          const ok = Boolean(item.correct);
+          const prompt = item.prompt || item.question || "";
+          const questionExtra =
+            item.question && item.prompt && item.question !== item.prompt
+              ? `<p class="review-q-extra">${escapeHtml(item.question)}</p>`
+              : "";
+          return `
+            <article class="review-item ${ok ? "is-correct" : "is-wrong"}">
+              <header class="review-item-head">
+                <span class="review-badge">${ok ? "Right" : "Wrong"}</span>
+                <span class="review-qnum">Q${item.id || i + 1}</span>
+                <span class="review-topic">${escapeHtml(item.topic || "")}</span>
+              </header>
+              <p class="review-prompt">${escapeHtml(prompt)}</p>
+              ${questionExtra}
+              <p class="review-line"><span>Student</span> ${escapeHtml(
+                item.studentAnswer || "(blank)"
+              )}</p>
+              <p class="review-line"><span>Correct</span> ${escapeHtml(
+                item.correctAnswer || ""
+              )}</p>
+              ${
+                item.explain
+                  ? `<p class="review-explain">${escapeHtml(item.explain)}</p>`
+                  : ""
+              }
+            </article>`;
+        })
+        .join("");
+    }
+
+    els.reviewModal.hidden = false;
+    document.body.classList.add("modal-open");
+    els.btnReviewClose.focus();
+  }
+
+  function closeReview() {
+    els.reviewModal.hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+
   function render(state) {
     const student = state.assignedUser || "(none)";
     els.assignInput.value = state.assignedUser || "";
@@ -49,6 +116,7 @@
     els.liveBadge.classList.toggle("is-on", Boolean(state.liveMode));
 
     const scores = (state.scores && state.scores[state.studentKey]) || {};
+    latestScores = scores;
     const catalog = allQuizzes();
 
     els.subjectProgress.innerHTML = SUBJECTS.map((s) => {
@@ -76,16 +144,27 @@
     els.quizProgress.innerHTML = catalog
       .map((q) => {
         const row = scores[q.id];
-        const status = row
-          ? `<span class="quiz-done">${row.score} / ${row.total}</span>`
-          : `<span class="quiz-open">Not taken</span>`;
+        if (row) {
+          return `
+          <button type="button" class="quiz-progress-row is-clickable" data-review-id="${escapeHtml(
+            q.id
+          )}">
+            <div>
+              <p class="quiz-progress-title">${escapeHtml(q.title)}</p>
+              <p class="quiz-progress-meta">${escapeHtml(
+                q.subjectLabel
+              )} · tap to review</p>
+            </div>
+            <span class="quiz-done">${row.score} / ${row.total}</span>
+          </button>`;
+        }
         return `
           <div class="quiz-progress-row">
             <div>
               <p class="quiz-progress-title">${escapeHtml(q.title)}</p>
               <p class="quiz-progress-meta">${escapeHtml(q.subjectLabel)}</p>
             </div>
-            ${status}
+            <span class="quiz-open">Not taken</span>
           </div>`;
       })
       .join("");
@@ -133,6 +212,20 @@
     } catch (ex) {
       alert(ex.message || "Could not clear scores");
     }
+  });
+
+  els.quizProgress.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-review-id]");
+    if (!btn) return;
+    openReview(btn.getAttribute("data-review-id"));
+  });
+
+  els.btnReviewClose.addEventListener("click", closeReview);
+  els.reviewModal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close-review]")) closeReview();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !els.reviewModal.hidden) closeReview();
   });
 
   els.btnLogout.addEventListener("click", () => S.logout());
