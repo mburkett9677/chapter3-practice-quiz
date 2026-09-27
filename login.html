@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in · Claire’s Quizzes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="sparkles" aria-hidden="true">
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+    <span class="sparkle"></span>
+  </div>
+
+  <main class="app login-app">
+    <section class="screen screen-start is-active login-card">
+      <p class="eyebrow">Claire’s Quizzes</p>
+      <h1 class="brand">Sign<br /><span>in</span></h1>
+      <p class="lede">Enter your name — no password. Students use the assigned name; parent admin uses Matt1113.</p>
+
+      <form id="login-form" class="login-form">
+        <label class="fill-label" for="login-name">Name</label>
+        <input
+          id="login-name"
+          class="fill-input login-input"
+          type="text"
+          autocomplete="username"
+          autocapitalize="words"
+          spellcheck="false"
+          placeholder="e.g. Claire or Matt1113"
+          required
+        />
+        <p class="login-error" id="login-error" hidden></p>
+        <div class="cta-row">
+          <button type="submit" class="btn btn-primary" id="login-submit">Continue</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="session.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById("login-form");
+      const input = document.getElementById("login-name");
+      const err = document.getElementById("login-error");
+      const submit = document.getElementById("login-submit");
+      const existing = window.QuizSession.getStoredName();
+      if (existing) input.value = existing;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.hidden = true;
+        submit.disabled = true;
+        try {
+          const data = await window.QuizSession.login(input.value);
+          if (data.role === "admin") window.location.href = "admin.html";
+          else if (data.role === "student") window.location.href = "index.html";
+          else throw new Error("Unknown role");
+        } catch (ex) {
+          err.textContent = ex.message || "Could not sign in";
+          err.hidden = false;
+          submit.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
