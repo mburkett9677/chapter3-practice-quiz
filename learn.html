@@ -52,7 +52,15 @@
     <div id="learn-panels" class="learn-panels"></div>
   </main>
 
+  <script src="session.js"></script>
   <script src="learn-content.js"></script>
   <script src="learn.js"></script>
+  <script>
+    (function () {
+      const S = window.QuizSession;
+      if (!S) return;
+      S.requireRole("student").catch(() => S.logout());
+    })();
+  </script>
 </body>
 </html>
