@@ -33,6 +33,12 @@
         Pick a short 10-question quiz. Same format every time: answer, see if you’re right, then move on.
       </p>
 
+      <nav class="home-nav" aria-label="Study tools">
+        <button type="button" class="btn btn-primary home-nav-btn" id="btn-vocab" aria-haspopup="dialog" aria-controls="vocab-modal">
+          English Vocab
+        </button>
+      </nav>
+
       <section class="home-section" aria-labelledby="math-heading">
         <h2 id="math-heading" class="home-heading">Math · Chapter 3</h2>
         <p class="home-sub">Fractions, decimals, integers, and mixed operations — eight short quizzes.</p>
@@ -59,6 +65,29 @@
     </section>
   </main>
 
+  <div class="modal" id="vocab-modal" hidden>
+    <div class="modal-backdrop" data-close-vocab tabindex="-1"></div>
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="vocab-modal-title"
+    >
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow modal-eyebrow">Claire’s · English</p>
+          <h2 class="modal-title" id="vocab-modal-title">English Vocab · Unit 3</h2>
+          <p class="modal-sub" id="vocab-modal-sub">Sadlier Vocabulary Workshop — Unit 3</p>
+        </div>
+        <button type="button" class="modal-close" id="btn-vocab-close" aria-label="Close vocabulary">
+          Close
+        </button>
+      </header>
+      <div class="modal-body" id="vocab-list"></div>
+    </div>
+  </div>
+
+  <script src="vocab-unit3.js"></script>
   <script src="quiz-nav.js"></script>
   <script src="quiz-math-1.js"></script>
   <script src="quiz-math-2.js"></script>
@@ -97,6 +126,70 @@
 
       renderGroup("math-links", catalog.nav.math);
       renderGroup("history-links", catalog.nav.history);
+    })();
+
+    (function () {
+      const data = window.VOCAB_UNIT3;
+      const modal = document.getElementById("vocab-modal");
+      const list = document.getElementById("vocab-list");
+      const openBtn = document.getElementById("btn-vocab");
+      const closeBtn = document.getElementById("btn-vocab-close");
+      if (!data || !modal || !list || !openBtn) return;
+
+      const sub = document.getElementById("vocab-modal-sub");
+      const title = document.getElementById("vocab-modal-title");
+      if (title) title.textContent = data.title;
+      if (sub) sub.textContent = data.subtitle;
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      list.innerHTML = data.words
+        .map(
+          (w, i) => `
+        <article class="vocab-entry" style="--i:${i}">
+          <header class="vocab-entry-head">
+            <h3 class="vocab-word">${escapeHtml(w.word)}</h3>
+            <span class="vocab-pos">${escapeHtml(w.partOfSpeech)}</span>
+          </header>
+          <p class="vocab-def">${escapeHtml(w.definition)}</p>
+          <dl class="vocab-meta">
+            <div><dt>Synonym</dt><dd>${escapeHtml(w.synonym)}</dd></div>
+            <div><dt>Antonym</dt><dd>${escapeHtml(w.antonym)}</dd></div>
+          </dl>
+          <p class="vocab-example"><span>Example</span> ${escapeHtml(w.example)}</p>
+        </article>`
+        )
+        .join("");
+
+      let lastFocus = null;
+
+      function openModal() {
+        lastFocus = document.activeElement;
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+        closeBtn.focus();
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      openBtn.addEventListener("click", openModal);
+      closeBtn.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => {
+        if (e.target.closest("[data-close-vocab]")) closeModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.hidden) closeModal();
+      });
     })();
   </script>
 </body>
