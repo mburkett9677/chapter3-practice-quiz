@@ -469,6 +469,30 @@
     if (state.scoreSubmitted || !quizDef || !S) return;
     state.scoreSubmitted = true;
     const total = state.queue.length;
+    const review = state.queue.map((q, i) => {
+      const ans = state.answers[i] || {};
+      let studentAnswer = "";
+      if (isFillQuestion(q)) {
+        studentAnswer = ans.typed || "";
+      } else if (typeof ans.choiceIndex === "number" && q.choices && q.choices[ans.choiceIndex]) {
+        studentAnswer = q.choices[ans.choiceIndex].text || "";
+      }
+      const promptText = String(q.prompt || "")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .trim();
+      const questionText = String(q.question || "").trim();
+      return {
+        id: q.id,
+        topic: q.topic || "",
+        prompt: promptText,
+        question: questionText,
+        studentAnswer,
+        correctAnswer: correctAnswerText(q),
+        correct: Boolean(ans.correct),
+        explain: String(q.explain || "").replace(/<[^>]+>/g, ""),
+      };
+    });
     try {
       await S.submitScore({
         quizId: quizDef.id,
@@ -476,6 +500,7 @@
         title: quizDef.title,
         score: state.score,
         total,
+        review,
       });
     } catch (ex) {
       console.warn("Score save failed", ex);
