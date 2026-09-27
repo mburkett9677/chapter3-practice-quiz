@@ -918,6 +918,7 @@ body {
   margin: 0 0 0.4rem;
   font-family: var(--font-display);
   font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.25;
   color: var(--ink);
 }
