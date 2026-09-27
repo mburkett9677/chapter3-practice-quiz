@@ -889,8 +889,8 @@ body {
   margin: 1.75rem 0 0.75rem;
   font-family: var(--font-display);
   font-size: 1.25rem;
-  color: var(--ink);
   font-weight: 700;
+  color: var(--ink);
 }
 
 .learn-jump-grid,
