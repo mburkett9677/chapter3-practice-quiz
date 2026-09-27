@@ -1,1 +1,21 @@
-PLACEHOLDER
+:root {
+  --ink: #3a1a2c;
+  --muted: #7a4a62;
+  --paper: #fff5f9;
+  --panel: rgba(255, 255, 255, 0.82);
+  --teal: #e8367a;
+  --teal-deep: #c41f61;
+  --accent: #e8367a;
+  --accent-deep: #c41f61;
+  --accent-soft: #ff7eb3;
+  --amber: #e8a0bf;
+  --ok: #1f7a4d;
+  --ok-bg: #e7f6ee;
+  --bad: #b42318;
+  --bad-bg: #fdecea;
+  --line: rgba(58, 26, 44, 0.12);
+  --shadow: 0 18px 50px rgba(200, 60, 120, 0.14);
+  --radius: 18px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Figtree", "Segoe UI", sans-serif;
+}
