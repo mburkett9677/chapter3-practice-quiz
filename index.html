@@ -33,11 +33,19 @@
         Pick a short 10-question quiz. Same format every time: answer, see if you’re right, then move on.
       </p>
 
-      <nav class="home-nav" aria-label="Study tools">
-        <button type="button" class="btn btn-primary home-nav-btn" id="btn-vocab" aria-haspopup="dialog" aria-controls="vocab-modal">
-          English Vocab
-        </button>
-      </nav>
+      <section class="home-section" aria-labelledby="english-heading">
+        <h2 id="english-heading" class="home-heading">English Vocab</h2>
+        <p class="home-sub">Sadlier Unit 3 — study the word list, then try definition matching or fill-in-the-blank.</p>
+        <nav class="learn-nav" aria-label="English vocab study">
+          <p class="learn-nav-label">Study</p>
+          <div class="learn-nav-links">
+            <button type="button" class="learn-nav-action" id="btn-vocab" aria-haspopup="dialog" aria-controls="vocab-modal">
+              Word list
+            </button>
+          </div>
+        </nav>
+        <div class="quiz-links" id="english-links"></div>
+      </section>
 
       <section class="home-section" aria-labelledby="math-heading">
         <h2 id="math-heading" class="home-heading">Math · Chapter 3</h2>
@@ -105,6 +113,8 @@
   <script src="quiz-history-6.js"></script>
   <script src="quiz-history-7.js"></script>
   <script src="quiz-history-8.js"></script>
+  <script src="quiz-vocab-1.js"></script>
+  <script src="quiz-vocab-2.js"></script>
   <script src="quiz-catalog-boot.js"></script>
   <script>
     (function () {
@@ -113,7 +123,8 @@
 
       function renderGroup(elId, items) {
         const root = document.getElementById(elId);
-        root.innerHTML = items
+        if (!root) return;
+        root.innerHTML = (items || [])
           .map(
             (q) => `
           <a class="quiz-link" href="quiz.html?id=${encodeURIComponent(q.id)}">
@@ -124,8 +135,9 @@
           .join("");
       }
 
-      renderGroup("math-links", catalog.nav.math);
-      renderGroup("history-links", catalog.nav.history);
+      renderGroup("math-links", catalog.nav.math || []);
+      renderGroup("history-links", catalog.nav.history || []);
+      renderGroup("english-links", catalog.nav.english || []);
     })();
 
     (function () {
