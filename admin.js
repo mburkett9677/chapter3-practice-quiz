@@ -1,6 +1,6 @@
 (function () {
   const S = window.QuizSession;
-  const nav = window.QUIZ_NAV || { math: [], history: [], english: [] };
+  const nav = window.QUIZ_NAV || { math: [], history: [], english: [], science: [] };
 
   const els = {
     lede: document.getElementById("admin-lede"),
@@ -26,6 +26,7 @@
 
   const SUBJECTS = [
     { id: "math", label: "Math", quizzes: nav.math || [] },
+    { id: "science", label: "Science", quizzes: nav.science || [] },
     { id: "history", label: "History", quizzes: nav.history || [] },
     { id: "english", label: "English", quizzes: nav.english || [] },
   ];
