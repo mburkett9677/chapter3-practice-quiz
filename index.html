@@ -58,6 +58,12 @@
         <div class="quiz-links" id="math-links"></div>
       </section>
 
+      <section class="home-section" aria-labelledby="science-heading">
+        <h2 id="science-heading" class="home-heading">Science · Unit 2</h2>
+        <p class="home-sub">Force and motion — Newton’s laws, gravity, graphs, and calculations (eight short quizzes).</p>
+        <div class="quiz-links" id="science-links"></div>
+      </section>
+
       <section class="home-section" aria-labelledby="history-heading">
         <h2 id="history-heading" class="home-heading">History</h2>
         <p class="home-sub">Early American History — colonies, leaders, religion, slavery, and government (eight short quizzes).</p>
@@ -121,6 +127,14 @@
   <script src="quiz-history-8.js"></script>
   <script src="quiz-vocab-1.js"></script>
   <script src="quiz-vocab-2.js"></script>
+  <script src="quiz-science-1.js"></script>
+  <script src="quiz-science-2.js"></script>
+  <script src="quiz-science-3.js"></script>
+  <script src="quiz-science-4.js"></script>
+  <script src="quiz-science-5.js"></script>
+  <script src="quiz-science-6.js"></script>
+  <script src="quiz-science-7.js"></script>
+  <script src="quiz-science-8.js"></script>
   <script src="quiz-catalog-boot.js"></script>
   <script>
     (function () {
@@ -180,6 +194,7 @@
         const scores = (state.scores && state.scores[state.studentKey]) || {};
         if (!catalog) return;
         renderGroup("math-links", catalog.nav.math || [], scores, state.liveMode);
+        renderGroup("science-links", catalog.nav.science || [], scores, state.liveMode);
         renderGroup("history-links", catalog.nav.history || [], scores, state.liveMode);
         renderGroup("english-links", catalog.nav.english || [], scores, state.liveMode);
       }
