@@ -112,5 +112,55 @@ window.QUIZ_NAV = {
       "blurb": "Type the vocab word that completes each sentence",
       "count": 10
     }
+  ],
+  "science": [
+    {
+      "id": "science-1",
+      "title": "Force · Quiz 1",
+      "blurb": "Balanced and Unbalanced Forces & Inertia",
+      "count": 10
+    },
+    {
+      "id": "science-2",
+      "title": "Force · Quiz 2",
+      "blurb": "Newton's Second Law and Force Calculations",
+      "count": 10
+    },
+    {
+      "id": "science-3",
+      "title": "Force · Quiz 3",
+      "blurb": "Gravity, Mass, Weight, Friction, and Air Resistance",
+      "count": 10
+    },
+    {
+      "id": "science-4",
+      "title": "Force · Quiz 4",
+      "blurb": "Newton's Third Law, Momentum, and Terminal Velocity",
+      "count": 10
+    },
+    {
+      "id": "science-5",
+      "title": "Motion · Quiz 1",
+      "blurb": "Speed, Velocity, Distance, and Displacement",
+      "count": 10
+    },
+    {
+      "id": "science-6",
+      "title": "Motion · Quiz 2",
+      "blurb": "Acceleration and Changing Velocity",
+      "count": 10
+    },
+    {
+      "id": "science-7",
+      "title": "Motion · Quiz 3",
+      "blurb": "Reading Motion Graphs",
+      "count": 10
+    },
+    {
+      "id": "science-8",
+      "title": "Motion · Quiz 4",
+      "blurb": "Motion Calculations",
+      "count": 10
+    }
   ]
 };
