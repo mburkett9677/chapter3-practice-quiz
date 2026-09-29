@@ -132,6 +132,7 @@ window.QuizSession = (function () {
     if (String(quizId).startsWith("math")) return "math";
     if (String(quizId).startsWith("history")) return "history";
     if (String(quizId).startsWith("vocab")) return "english";
+    if (String(quizId).startsWith("science")) return "science";
     return "other";
   }
 
