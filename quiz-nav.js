@@ -97,6 +97,12 @@ window.QUIZ_NAV = {
       "title": "Early America · Quiz 8",
       "blurb": "Maryland, Pennsylvania, Georgia & government",
       "count": 10
+    },
+    {
+      "id": "history-9",
+      "title": "Early America · Quiz 9",
+      "blurb": "Pontiac’s War & Proclamation of 1763",
+      "count": 11
     }
   ],
   "english": [
