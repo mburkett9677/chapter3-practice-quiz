@@ -103,6 +103,12 @@ window.QUIZ_NAV = {
       "title": "Early America · Quiz 9",
       "blurb": "Pontiac’s War & Proclamation of 1763",
       "count": 11
+    },
+    {
+      "id": "history-10",
+      "title": "Early America · Quiz 10",
+      "blurb": "Sugar, Stamp & Quartering Acts",
+      "count": 13
     }
   ],
   "english": [
